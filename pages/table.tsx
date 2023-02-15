@@ -7,6 +7,7 @@ export interface currency {
 }
 export default function TableData() {
   const [currency, setCurrency] = useState<currency[]>([]);
+  const [result, setResult] = useState<currency[]>([]);
 
   const fetchData = async () => {
     try {
@@ -21,11 +22,28 @@ export default function TableData() {
         });
       }
       setCurrency(currencyData);
+      setResult(currencyData);
     } catch (error) {
       console.log(error);
     }
   };
 
+  const handleSearch = (searchValue: string) => {
+    if (!searchValue.length) {
+      setResult(currency);
+      return;
+    }
+
+    const searchResults = currency.filter((currencyData) => {
+      if (
+        currencyData.symbol.includes(searchValue) ||
+        currencyData.currency.includes(searchValue)
+      )
+        return currencyData;
+    });
+
+    setResult(searchResults);
+  };
   useEffect(() => {
     if (currency.length === 0) fetchData();
   }, [currency]);
@@ -33,6 +51,13 @@ export default function TableData() {
   return (
     <>
       <div>
+        <input
+          style={{ margin: '10px' }}
+          type="text"
+          onChange={(e) => {
+            handleSearch(e.target.value);
+          }}
+        ></input>
         <table>
           <tbody>
             <tr>
@@ -40,7 +65,7 @@ export default function TableData() {
               <th>Currency</th>
             </tr>
             {currency &&
-              currency.map((currencyData) => {
+              result.map((currencyData) => {
                 return (
                   <tr key={currencyData.symbol}>
                     <td>{currencyData.symbol}</td>
